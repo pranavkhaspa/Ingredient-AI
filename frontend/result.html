@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detected Ingredients</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+    <h1>Detected Ingredients</h1>
+    <ul id="ingredientsList"></ul>
+    <button onclick="goBack()">Upload Another</button>
+
+    <script>
+        function displayIngredients() {
+            let ingredients = JSON.parse(localStorage.getItem("ingredients"));
+            let list = document.getElementById("ingredientsList");
+
+            if (!ingredients) {
+                list.innerHTML = "<p>No ingredients found.</p>";
+                return;
+            }
+
+            ingredients.forEach(item => {
+                let listItem = document.createElement("li");
+                listItem.innerText = `${item.label} (${(item.score * 100).toFixed(2)}%)`;
+                list.appendChild(listItem);
+            });
+        }
+
+        function goBack() {
+            window.location.href = "index.html";
+        }
+
+        window.onload = displayIngredients;
+    </script>
+</body>
+</html>
