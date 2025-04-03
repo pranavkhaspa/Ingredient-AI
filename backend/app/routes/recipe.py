@@ -1,4 +1,6 @@
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from typing import List
 from pymongo import MongoClient
 import google.generativeai as genai
 import os
@@ -44,3 +46,26 @@ def generate_recipe(recipe_name: str):
         return {"instructions": response.text}
     except Exception as e:
         return {"error": str(e)}
+
+# ✅ 5️⃣ Match Recipes by Category + Ingredients
+class RecipeRequest(BaseModel):
+    category: str
+    ingredients: List[str]
+
+@router.post("/recipes/match")
+def match_recipes(request: RecipeRequest):
+    matched = []
+    all_recipes = collection.find({"category": request.category}, {"_id": 0})
+
+    for recipe in all_recipes:
+        recipe_ingredients = [i.lower() for i in recipe.get("ingredients", [])]
+        if any(ing.lower() in recipe_ingredients for ing in request.ingredients):
+            matched.append({
+                "name": recipe["name"],
+                "description": recipe.get("description", "No description"),
+                "ingredients": recipe_ingredients
+            })
+
+    if not matched:
+        return {"recipes": []}
+    return {"recipes": matched}
