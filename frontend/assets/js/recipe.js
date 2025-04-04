@@ -1,5 +1,4 @@
-// assets/js/recipe.js
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
     const recipeContainer = document.getElementById("recipe-container");
     const category = localStorage.getItem("selectedCategory");
 
@@ -8,27 +7,28 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    // Sample recipe data
-    const recipes = {
-        gym: ["Protein Smoothie", "Grilled Chicken", "Oatmeal Pancakes"],
-        protein: ["Egg Whites Omelet", "Peanut Butter Shake", "Tuna Salad"],
-        dieting: ["Keto Salad", "Quinoa Bowl", "Avocado Toast"],
-        general_health: ["Fruit Salad", "Detox Drink", "Vegetable Soup"]
-    };
+    try {
+        // Fetch recipes dynamically from the backend
+        const response = await fetch(`/recipes?category=${category}`);
+        const data = await response.json();
 
-    if (!recipes[category]) {
-        recipeContainer.innerHTML = "<p>No recipes found for this category.</p>";
-        return;
+        if (!data || data.length === 0) {
+            recipeContainer.innerHTML = "<p>No recipes found for this category.</p>";
+            return;
+        }
+
+        // Create recipe buttons
+        data.forEach(recipe => {
+            const button = document.createElement("button");
+            button.textContent = recipe;
+            button.className = "recipe-btn";
+            button.onclick = () => selectRecipe(recipe);
+            recipeContainer.appendChild(button);
+        });
+    } catch (error) {
+        console.error("Error fetching recipes:", error);
+        recipeContainer.innerHTML = "<p>Failed to load recipes. Please try again later.</p>";
     }
-
-    // Create recipe buttons
-    recipes[category].forEach(recipe => {
-        const button = document.createElement("button");
-        button.textContent = recipe;
-        button.className = "recipe-btn";
-        button.onclick = () => selectRecipe(recipe);
-        recipeContainer.appendChild(button);
-    });
 });
 
 // Store selected recipe and go to details page
